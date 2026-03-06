@@ -562,27 +562,33 @@ def set_external_info(
     uri = kwargs.get("uri", "")
     endpoint = kwargs.get("endpoint", "")
     nosignrequest = kwargs.get("nosignrequest", False)
+    parseuri = kwargs.get("parseuri", False)
 
-    if image_path is not None:
-        uri = uri.rstrip("/") + "/" + image_path
-    parsed_uri = urlsplit(uri)
-    scheme = f"{parsed_uri.scheme}"
+    if parseuri:
+        if image_path is not None:
+            uri = uri.rstrip("/") + "/" + image_path
+        parsed_uri = urlsplit(uri)
+        scheme = f"{parsed_uri.scheme}"
 
-    if "http" in scheme:
-        endpoint = "https://" + f"{parsed_uri.netloc}"
-        nosignrequest = True
-        path = f"{parsed_uri.path}"
-        if path.startswith("/"):
-            path = path[1:]
-        # omero-zarr-pixel-buffer s3 - need to remove /
-        if path.endswith("/"):
-            path = path[:-1]
-        uri = "s3://" + path
+        if "http" in scheme:
+            endpoint = "https://" + f"{parsed_uri.netloc}"
+            nosignrequest = True
+            path = f"{parsed_uri.path}"
+            if path.startswith("/"):
+                path = path[1:]
+            # omero-zarr-pixel-buffer s3 - need to remove trailing slash
+            if path.endswith("/"):
+                path = path[:-1]
+            uri = "s3://" + path
 
-    if not uri.startswith("/"):
-        uri = format_s3_uri(uri, endpoint)
-    if nosignrequest:
-        uri = uri + "?anonymous=true"
+        if not uri.startswith("/"):
+            uri = format_s3_uri(uri, endpoint)
+        if nosignrequest:
+            uri = uri + "?anonymous=true"
+    else:
+        # omero-zarr-pixel-buffer s3 - need to remove trailing slash
+        uri = uri.rstrip("/")
+        
     setattr(extinfo, "lsid", rstring(uri))
     print("lsid:", uri)
     image.details.externalInfo = extinfo
