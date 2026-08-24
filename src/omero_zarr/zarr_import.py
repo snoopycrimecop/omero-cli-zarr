@@ -574,13 +574,14 @@ def set_external_info(
         path = f"{parsed_uri.path}"
         if path.startswith("/"):
             path = path[1:]
+        # omero-zarr-pixel-buffer s3 - need to remove /
+        if path.endswith("/"):
+            path = path[:-1]
         uri = "s3://" + path
 
     if not uri.startswith("/"):
         uri = format_s3_uri(uri, endpoint)
     if nosignrequest:
-        if not uri.endswith("/"):
-            uri = uri + "/"
         uri = uri + "?anonymous=true"
     setattr(extinfo, "lsid", rstring(uri))
     print("lsid:", uri)
