@@ -585,7 +585,7 @@ def set_external_info(
             uri = format_s3_uri(uri, endpoint)
         if nosignrequest:
             uri = uri + "?anonymous=true"
-        
+
     setattr(extinfo, "lsid", rstring(uri))
     print("lsid:", uri)
     image.details.externalInfo = extinfo
